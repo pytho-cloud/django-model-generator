@@ -10,11 +10,12 @@ class ModelManager:
         self.attributes = []
         self.attribute_names = set()
 
-    def model_exists(self):
+    def model_exists(self, inputs=None):
         """Check if the model already exists in models.py"""
         try:
             with open("models.py", "r") as f:
                 content = f.read()
+
             if f"class {self.model_name}(models.Model):" in content:
                 return True
             return False
@@ -37,6 +38,17 @@ class ModelManager:
             print(f"Error creating models.py: {str(e)}")
             return False
 
+    def add_model_attr_after_model_exists(self, inputs):
+
+        if len(inputs) == 0:
+            return "enter your model name which u want update"
+
+        model_exists = self.model_counts_list(inputs)
+
+        if not model_exists:
+            return f"models does not exist "
+        return "You have Chance to Update Guys "
+
     def take_model_name(self):
         """Prompt the user for a model name and check if it exists"""
         self.model_name = input("Enter Your Model Name: ")
@@ -55,6 +67,26 @@ class ModelManager:
             print(f"An error occurred: {str(e)}")
             return None
 
+    def model_counts_list(self, model_name=""):
+        "Here we Check counts of models in our models.py files"
+
+        try:
+            with open("models.py", "r") as f:
+                content = f.read()
+
+            models = re.findall(r"class\s+(\w+)\(models.Model\):", content)
+
+            if len(model_name) != 0:
+
+                if model_name not in models:
+
+                    return False
+                return True
+            return len(models), models
+
+        except Exception as e:
+            print(f"Error reading models.py: {str(e)},")
+
     def check_models(self):
         """Check for existing models in models.py"""
         try:
@@ -62,22 +94,31 @@ class ModelManager:
                 content = f.read()
 
             models = re.findall(r"class\s+(\w+)\(models.Model\):", content)
+            print(models, "this is my models data ")
 
             if len(models) != 0:
-                return (
-                    f"There are {len(models)} models in models.py: {', '.join(models)}."
-                )
+                return f"There are {len(models)} models in models.py: {', '.join(models)}.,{len(models)}"
             else:
-                return "No models found in models.py."
+                return f"No models found in models.py.{len(models)}"
         except Exception as e:
             print(f"Error reading models.py: {str(e)}")
 
     def add_attributes(self):
         """Add attributes to the model"""
-        model_length = int(
-            input(f"Enter the number of attributes for the '{self.model_name}' model: ")
-        )
 
+        while True:
+            try:
+                model_length = int(
+                    input(
+                        f"Enter the number of attributes for the '{self.model_name}' model: "
+                    )
+                )
+                break
+            except ValueError as e:
+                print(
+                    f"Invalid input for number of attributes. Please enter a valid integer."
+                )
+                continue
         while model_length > 0:
             print(model_length, "times running ")
             model_attr_name = input("Enter your attribute name: ")
@@ -110,26 +151,47 @@ class ModelManager:
             model_attr.write_model_attributes()  # Call to write the attribute immediately
             model_length -= 1
 
+    def createStr(self):
+        return "String is creating "
     def run(self):
         """Run the main logic"""
-        if len(sys.argv) < 2:
-            print("Usage: py createModel.py <command>")
-            return
+        print(sys.argv, "fdsfsds")
+        command = sys.argv
 
-        command = sys.argv[1]
-
-        if command == "showmodels":
+        if 'set' in command:
+            lengths = self.check_models()
+            print(lengths[len(lengths) - 1])
+            if int(lengths[len(lengths) - 1]) == 0:
+                print("models.py doesn't have any models, create it by using py createmodel.py createModel")
+            else:
+                self.createStr()
+        
+        elif "showmodel" in command:  
             result = self.check_models()
-            print(result)
+            print(result, '--------')
+        
+        elif "updatemodel" in command:  
+            print("dfsdfds", len(sys.argv))
+            if len(sys.argv) == 2:  
+                model_name = input("Enter your model name: ")
+            else:
+                model_name = sys.argv[2]
 
-        elif command == "createModel":
+            result = self.model_counts_list(model_name)
+            if not result:
+                print(f"No models exist with the given name {model_name}")
+            else:
+                self.add_attributes()
+
+        elif "createModel" in command:  
             if self.create_model_file():
                 self.take_model_name()
                 if self.model_name:
                     self.add_attributes()
 
-        else:
-            print("Invalid command. Only 'showmodels' or 'createModel' are supported.")
+        else:  
+            print("why")
+            print("Invalid command. Only 'showmodel', 'updatemodel', or 'createModel' are supported.")
 
 
 if __name__ == "__main__":

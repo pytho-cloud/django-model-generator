@@ -52,7 +52,6 @@ class ModelMaker:
             "email": f"    {self.attr_name} = models.EmailField(primary_key={self.primary_key})\n",
             "datetime": f"    {self.attr_name} = models.DateTimeField({self.is_primary_key()})\n",
             "text": f"    {self.attr_name} = models.TextField({self.is_primary_key()},{self.set_extra_attr()})\n",
-            "decimal":  f"    {self.attr_name} = models.DecimalField({self.is_primary_key()},)\n"
         }
 
         if self.attr_field in attr_dict:
@@ -84,5 +83,3 @@ class ModelMaker:
 
         extra_data = extra.get_extra_attributes()  # Retrieve extra attributes
         return extra_data
-
-
